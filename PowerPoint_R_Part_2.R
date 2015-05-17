@@ -58,8 +58,7 @@ films$character_name <- daply(films,.(index),get_character,filmography)
 # Loop through the films and download the poster image into the "img" subdirectory.
 # If the poster is not found, flag the file name with 0.
 for (i in 1:nrow(films)) {
-    img_page <- html(film$url[i])
-    img_node <- img_page %>% html_nodes(xpath='//td[@id="img_primary"]//img')
+    img_node <- html(films$url[i]) %>% html_nodes(xpath='//td[@id="img_primary"]//img')
     if (length(img_node)==0) {
         films$img_file[i] <- "img/img00.jpg"
         cat(i," : img file NOT FOUND: ",films$img_file[i],"\n")
