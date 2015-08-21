@@ -1,8 +1,8 @@
 # Setup
 install.packages(c("RDCOMClient","XML","rvest"))  
-library("RDCOMClient")   
-library("XML")   
-library("rvest")
+library(RDCOMClient)   
+library(XML)   
+library(rvest)
 
 # Start up PowerPoint 
 pp <- COMCreate("Powerpoint.Application")
