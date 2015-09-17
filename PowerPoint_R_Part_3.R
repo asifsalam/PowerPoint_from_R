@@ -4,14 +4,13 @@ library(dplyr)
 library(stringr)
 library(rvest)
 
-
+# Assuming all the files are stored in the 
 # download and read in the data files
 
 download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_films.csv", 
               destfile = "eastwood_films.csv")
 download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_box_office.csv", 
               destfile = "box_office.csv")
-
 films <- read.table("eastwood_films.csv",header=TRUE, stringsAsFactors=FALSE)
 box_office <- read.table("box_office.csv",header=TRUE, stringsAsFactors=FALSE)
 source("mso.txt")
@@ -67,7 +66,6 @@ slide_color[["RGB"]] <- pp_rgb(0,0,0)
 slide_title <- slide1[["Shapes"]][["Title"]]
 slide_title_color <- slide1[["ColorScheme"]]$Colors(ms$ppTitle)
 slide_title_color[["RGB"]] <- pp_rgb(200,200,200)
-
 
 # Add a title
 # AutoSize: https://msdn.microsoft.com/EN-US/library/office/ff745311(v=office.15).aspx
