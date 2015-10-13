@@ -1,5 +1,4 @@
 # E-mail: asif.salam@hotmail.com
-
 library(RDCOMClient)
 library(plyr)
 library(dplyr)
@@ -8,9 +7,6 @@ library(rvest)
 
 # IMDB's Clint Eastwood page
 clint_url <- "http://www.imdb.com/name/nm0000142/"
-
-# Save the page locally, so you don't load the web-site
-local_path <- "C://Users//tksassa//Documents//20-GitProjects//2014//210-AutomatingPowerpoint//AutomatingPPT"
 
 #Set your local path here
 local_path <- "C://"
@@ -58,7 +54,8 @@ films$character_name <- daply(films,.(index),get_character,filmography)
 # Loop through the films and download the poster image into the "img" subdirectory.
 # If the poster is not found, flag the file name with 0.
 for (i in 1:nrow(films)) {
-    img_node <- html(films$url[i]) %>% html_nodes(xpath='//td[@id="img_primary"]//img')
+    img_node <- html(films$url[i]) %>% 
+                html_nodes(xpath='//td[@id="img_primary"]//img')
     if (length(img_node)==0) {
         films$img_file[i] <- "img/img00.jpg"
         cat(i," : img file NOT FOUND: ",films$img_file[i],"\n")

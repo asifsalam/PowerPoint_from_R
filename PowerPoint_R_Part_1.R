@@ -13,10 +13,15 @@ pp[["Visible"]] = 1
 # Add a new presentation
 presentation <- pp[["Presentations"]]$Add()
 
-# The presentation is empty.  Add a slide to it.
-slide1 <- presentation[["Slides"]]$Add(1,ms$ppLayoutBlank)
+# The presentation is empty.  Add a slide to it. We'll get to the enumerated constants 
+# used by Microsoft. For now, we'll use the value that results in a blank slide.
+# slide1 <- presentation[["Slides"]]$Add(1,ms$ppLayoutBlank)
+slide1 <- presentation[["Slides"]]$Add(1,12)
 
 # Add shapes and apply animation
+# Source the enumerated constants used by Microsoft for various parameters
+# The file is available on github.  Save it to the working directory 
+# https://github.com/asifsalam/PowerPoint_from_R/blob/master/mso.txt
 source("mso.txt")
 shp1 <- slide1[["Shapes"]]$AddShape(ms$msoShape12pointStar,20,20,100,100)
 slide1[["TimeLine"]][["MainSequence"]]$AddEffect(shp1,ms$msoAnimEffectFadedSwivel,
