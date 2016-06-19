@@ -10,7 +10,7 @@ library(rvest)
 download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_films.csv",
               destfile = "eastwood_films.csv")
 download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_box_office.csv",
-              destfile = "box_office.csv")
+              destfile = "eastwood_box_office.csv")
 films <- read.table("eastwood_films.tsv",header=TRUE,sep="\t", stringsAsFactors=FALSE)
 box_office <- read.table("eastwood_box_office.tsv",header=TRUE,sep="\t", stringsAsFactors=FALSE)
 source("mso.txt")
@@ -22,7 +22,7 @@ img_dir <- "img"
 # If the poster is not found, flag the file name with 0.
 if (!file.exists("img")) dir.create("img")
 for (i in 1:nrow(films)) {
-    img_node <- html(films$url[i]) %>%
+    img_node <- read_html(films$url[i]) %>%
         html_nodes(xpath='//td[@id="img_primary"]//img')
     if (length(img_node)==0) {
         films$img_file[i] <- "img/img00.jpg"
@@ -36,13 +36,13 @@ for (i in 1:nrow(films)) {
 }
 
 # Check which of the files were not found and download them manually
-films$title[which(films$img_file=="img/img00.jpg")]
+films$title[which(films$img_file=="img00.jpg")]
 
 # These images don't exist.  Download appropriate images manually, and rename
 # Films, Star in the Dust, The First Traveling Sales Lady, Dumbo Pilot
-films[55,"img_file"] <- "img/img55.jpg"
-films[54,"img_file"] <- "img/img54.jpg"
-films[52,"img_file"] <- "img/img52.jpg"
+#films[55,"img_file"] <- "img/img55.jpg"
+#films[54,"img_file"] <- "img/img54.jpg"
+#films[52,"img_file"] <- "img/img52.jpg"
 
 ########## Creating the PowerPoint Slide ###################33
 # Create the PowerPoint slide

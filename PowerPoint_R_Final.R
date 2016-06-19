@@ -10,25 +10,25 @@ library(rvest)
 # download and read in the data files
 download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_films.tsv",
               destfile = "films.tsv")
-download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_box_office.tsv", 
-              destfile = "box_office.tsv")
+download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_box_office.tsv",
+              destfile = "eastwood_box_office.tsv")
 
 films <- read.table("eastwood_films.csv",header=TRUE, stringsAsFactors=FALSE)
-box_office <- read.table("box_office.csv",header=TRUE, stringsAsFactors=FALSE)
+box_office <- read.table("eastwood_box_office.csv",header=TRUE, stringsAsFactors=FALSE)
 source("mso.txt")
 actor_name <- "Clint Eastwood"
 
-# If you haven't downloaded the images, already - 
+# If you haven't downloaded the images, already -
 # Loop through the films and download the poster image into the "img" subdirectory.
 # If the poster is not found, flag the file name with 0.
 if (!file.exists("img")) dir.create("img")
 for (i in 1:nrow(films)) {
-    img_node <- html(films$url[i]) %>% 
+    img_node <- html(films$url[i]) %>%
         html_nodes(xpath='//td[@id="img_primary"]//img')
     if (length(img_node)==0) {
         films$img_file[i] <- "img/img00.jpg"
         cat(i," : img file NOT FOUND: ",films$img_file[i],"\n")
-    } 
+    }
     else {
         img_link <- html_attr(img_node,"src")
         cat(i," :",films$img_file[i]," : ",img_link,"\n")
@@ -41,9 +41,9 @@ films$title[which(films$img_file=="img/img00.jpg")]
 
 # These images don't exist.  Download appropriate images manually, and rename
 # Films, Star in the Dust, The First Traveling Sales Lady, Dumbo Pilot
-films[55,"img_file"] <- "img/img55.jpg"
-films[54,"img_file"] <- "img/img54.jpg"
-films[52,"img_file"] <- "img/img52.jpg"
+#films[55,"img_file"] <- "img/img55.jpg"
+#films[54,"img_file"] <- "img/img54.jpg"
+#films[52,"img_file"] <- "img/img52.jpg"
 
 ########## Creating the PowerPoint Slide ###################
 # Create the PowerPoint slide
@@ -153,7 +153,7 @@ image <- NULL
 # 4 - An external trigger can also be specified
 # We can create a function that will apply animation to a shape, in this case the poster image
 # The goal is to move the image from one point to another
-# This function takes an timeline (sequence), the poster image that will be animated, 
+# This function takes an timeline (sequence), the poster image that will be animated,
 # the button that will trigger the animation, the path along which the image will move
 # and the duration, and applies the animation and parameters to the target poster image
 # (See the section at the bottom for function - animate_shape())
@@ -178,7 +178,7 @@ sort_fill[["Visible"]] <- 0
 sort_line <- sort_text[["Line"]]
 sort_line[["Visible"]] <- 0
 
-# Create buttons that will animate the poster images 
+# Create buttons that will animate the poster images
 button_alpha <- slide1[["Shapes"]]$AddShape(ms$msoShapeRectangle,slide_width - 300,10,100,40)
 bta_fill <- button_alpha[["Fill"]]
 bta_fill[["Visible"]] <-0
@@ -256,21 +256,21 @@ for (i in 1:nrow(films)) {
     img_file <- gsub("/","\\\\",paste(getwd(),"/",films$img_file[i],sep=""))
     images[[as.character(i)]] <- slide1[["Shapes"]]$AddPicture(img_file,TRUE,FALSE,x,y,image_width-2,image_height-2)
     image <- images[[as.character(i)]]
-    
+
     line <- image[["Line"]]
     line[["Style"]] <- ms$msoLineSingle
     line[["Weight"]] <- 1
     line[["ForeColor"]][["RGB"]] <- pp_rgb(243,211,129)
-    
+
     #glow <- image[["Glow"]]
     #glow[["Radius"]] <- 3
     #glow[["Transparency"]] <- 0.7
     #glow[["Color"]] <- pp_rgb(200,200,200)
-    
+
     link <- image$ActionSettings(ms$ppMouseClick)[["Hyperlink"]]
     link[["Address"]] <- films$url[i]
     link[["ScreenTip"]] <- paste0(films$title[i],"\nCharacter: ",films$character_name[i],"\nRelease Year: ",films$year[i])
-    
+
     index <- which(films$title[order(films$title)]==films$title[i]) - 1
     l1 <- format((0 + image_width * (index %% num_cols) - x)/slide_width,digits=3)
     l2 <- format((image_height*image_offset + image_height * (index %/% num_cols) - y)/slide_height,digits=3)
@@ -280,7 +280,7 @@ for (i in 1:nrow(films)) {
     animate_image(seq_date,image,button_date,path,2.0)
     trigger_seq <- ms$msoAnimTriggerWithPrevious
     if (i == 1) trigger_seq <- ms$msoAnimTriggerAfterPrevious
-    
+
     animation_start(seq_main,image,ms$msoAnimEffectDissolve,trigger_seq,
                   0, 0,0,0,0.5,0.1*i)
 }
@@ -379,7 +379,7 @@ toggle_button(seq_earnings2,btn_earnings,btn_release,1)
 for (i in 1:nrow(box_office)) {
     image_num <- which(box_office$key[i]==films$key)
     image <- images[[as.character(image_num)]]
-    
+
     x <- margin_left + (i-1)*(bar_w + bar_gap)
     bar_height <- scale_bar_height(max_value,max_height,box_office$adjusted_gross[i])
     y <- chart_top + max_height - bar_height
@@ -389,7 +389,7 @@ for (i in 1:nrow(box_office)) {
     #bar_fill[["ForeColor"]][["RGB"]] <- pp_rgb(0,138,105)
     #bar_fill[["ForeColor"]][["RGB"]] <- pp_rgb(233,174,27)
     bar_fill[["ForeColor"]][["RGB"]] <- pp_rgb(217,161,21)
-    
+
     index <- which(box_office$index[order(box_office$index)]==box_office$index[i]) - 1
     l1 <- format((margin_left + bar_w * index - x)/slide_width,digits=3)
     l2 <- format((0)/slide_height,digits=3)
@@ -400,7 +400,7 @@ for (i in 1:nrow(box_office)) {
     line[["ForeColor"]][["RGB"]] <- pp_rgb(118, 50, 39)
     line[["Transparency"]] <- 0
     line[["Visible"]] <- 0
-    
+
     bar_textframe <- bar[["TextFrame"]]
     bar_textframe[["TextRange"]][["Text"]] <- ""
     bar_textframe[["TextRange"]][["Text"]] <- box_office$title[i]
@@ -411,7 +411,7 @@ for (i in 1:nrow(box_office)) {
     bar_para <- bar_textframe[["TextRange"]][["ParagraphFormat"]]
     bar_para[["Alignment"]] <- ms$msoAlignLeft
     bar_font[["Color"]][["RGB"]] <- pp_rgb(247,224,167)
-    
+
     year <- slide1[["Shapes"]]$AddShape(ms$msoShapeRectangle,x,y+bar_height+3,bar_w,20)
     year_textframe <- year[["TextFrame"]]
     year_textframe[["TextRange"]][["Text"]] <- box_office$year[i]
@@ -427,13 +427,13 @@ for (i in 1:nrow(box_office)) {
     year_fill[["ForeColor"]][["RGB"]] <- pp_rgb(0,0,0)
     year_line <- year[["Line"]]
     year_line[["Visible"]] <- 0
-    
+
     click_box <- slide1[["Shapes"]]$AddShape(1,x,chart_top,bar_w,max_height)
     click_box_fill <- click_box[["Fill"]]
     click_box_fill[["Visible"]] <- 1
     click_box_fill[["ForeColor"]][["RGB"]] <- pp_rgb(247,224,167)
     click_box_fill[["Transparency"]] <- 0.99
-    
+
     line <- click_box[["Line"]]
     #line[["ForeColor"]][["RGB"]] <- pp_rgb(243,211,129)
     line[["Visible"]] <- 0
@@ -442,12 +442,12 @@ for (i in 1:nrow(box_office)) {
     animate_image(seq_earnings,bar,btn_release,path1)
     animate_image(seq_earnings,year,btn_release,path1)
     animate_image(seq_earnings,click_box,btn_release,path1)
-    
+
     path2 <- paste0("M",l1,",",l2," L0,0")
     animate_image(seq_year,bar,btn_earnings,path2)
     animate_image(seq_year,year,btn_earnings,path2)
     animate_image(seq_year,click_box,btn_earnings,path2)
-    
+
     animate_bar(seq_identify,image,click_box,2)
     trigger_seq <- ms$msoAnimTriggerWithPrevious
     animation_start(seq_main,bar,ms$msoAnimEffectEaseIn,trigger_seq,
@@ -507,9 +507,9 @@ animation_start(seq_main,label1,ms$msoAnimEffectEaseIn,trigger_seq,
                 0, 0,0,0,1,6+0.1*i)
 animation_start(seq_main,label2,ms$msoAnimEffectEaseIn,trigger_seq,
                 0, 0,0,0,1,6+0.1*i)
-    
+
 # ========================= Functions ===================== #
-    
+
 toggle_button <- function(seq,button1,button2,duration=1.5) {
     effect <- seq$AddEffect(Shape=button1,effectID=ms$msoAnimEffectDissolve,
                             trigger=ms$msoAnimTriggerOnShapeClick)
@@ -517,7 +517,7 @@ toggle_button <- function(seq,button1,button2,duration=1.5) {
     effectTiming <- effect[["Timing"]]
     effectTiming[["TriggerType"]] <- ms$msoAnimTriggerOnShapeClick
     effectTiming[["TriggerShape"]] <- button1
-    effectTiming[["Duration"]] <- duration    
+    effectTiming[["Duration"]] <- duration
     effect <- seq$AddEffect(Shape=button2,effectID=ms$msoAnimEffectDissolve,
                             trigger=ms$msoAnimTriggerOnShapeClick)
     effect[["Exit"]] <- 0
@@ -528,16 +528,16 @@ toggle_button <- function(seq,button1,button2,duration=1.5) {
 }
 
 animation_start <- function(seq,shape,effectID,trigger,from_x,from_y,to_x,to_y,duration,delay_time) {
-    
-    effect <- seq$AddEffect(Shape=shape,EffectID=effectID,Trigger=trigger)    
+
+    effect <- seq$AddEffect(Shape=shape,EffectID=effectID,Trigger=trigger)
     ani <- effect[["Behaviors"]]$Add(ms$msoAnimTypeMotion)
-    # MotionEffect Object: https://msdn.microsoft.com/EN-US/library/office/ff745317(v=office.15).aspx    
+    # MotionEffect Object: https://msdn.microsoft.com/EN-US/library/office/ff745317(v=office.15).aspx
     aniMotionEffect <- ani[["MotionEffect"]]
     # https://msdn.microsoft.com/EN-US/library/office/ff745317.aspx
     aniMotionEffect[["FromX"]] <- from_x
     aniMotionEffect[["ToX"]] <- to_x
     aniMotionEffect[["FromY"]] <- from_y
-    aniMotionEffect[["ToY"]] <- to_y   
+    aniMotionEffect[["ToY"]] <- to_y
     effectTiming <- effect[["Timing"]]
     effectTiming[["Duration"]] <- duration
     effectTiming[["TriggerDelayTime"]] <- delay_time
@@ -563,7 +563,7 @@ animate_bar <- function(seq,image,trigger,duration=1.5,delay_time=0) {
     effectTiming[["TriggerShape"]] <- trigger
     effectTiming[["Duration"]] <- duration
     effectTiming[["TriggerDelayTime"]] <- delay_time
-    
+
 }
 
 pp_rgb <- function(r,g,b) {
@@ -583,14 +583,14 @@ remove_shapes <- function(shape_name="Rectangle") {
         #print(paste0("index",i," - Shape: ",shp[["Name"]]))
         rect <- grepl(shape_name,shp[["Name"]])
         if (rect) {
-            j <- j +1     
+            j <- j +1
             shp_todelete[[j]] <- slide1$Shapes(i)
             #shp$Delete()
             print(paste0("Shape : ",shp[["Name"]]," deleted..."))
-        }      
+        }
     }
-    
+
     for (i in 1:j) {
         shp_todelete[[i]]$Delete()
-    }   
+    }
 }
