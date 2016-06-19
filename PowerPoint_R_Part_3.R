@@ -10,11 +10,9 @@ library(rvest)
 download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_films.csv",
               destfile = "eastwood_films.csv")
 download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_box_office.csv",
-              destfile = "eastwood_box_office.csv")
-local_folder<- "Clint Eastwood"
-local_path <- paste(".", local_folder,sep="/")
-films <- read.table(paste0(local_path,"/eastwood_films.csv"),header=TRUE,sep=",", stringsAsFactors=FALSE)
-box_office <- read.table(paste0(local_path,"/eastwood_box_office.csv"),header=TRUE,sep=",", stringsAsFactors=FALSE)
+              destfile = "box_office.csv")
+films <- read.table("eastwood_films.tsv",header=TRUE,sep="\t", stringsAsFactors=FALSE)
+box_office <- read.table("eastwood_box_office.tsv",header=TRUE,sep="\t", stringsAsFactors=FALSE)
 source("mso.txt")
 actor_name <- "Clint Eastwood"
 img_dir <- "img"
