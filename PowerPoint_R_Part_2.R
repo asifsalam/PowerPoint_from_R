@@ -10,7 +10,7 @@ clint_url <- "http://www.imdb.com/name/nm0000142/"
 
 #Set your local path here
 local_path <- "./Clint Eastwood"
-local_file <- paste0(local_path,"/Clint Eastwood - IMDb.html")
+local_file <- paste0(local_path,"Clint Eastwood - IMDb.html",sep="/")
 test_page <- read_html(local_file)
 clint_page <- read_html(clint_url)
 
@@ -58,7 +58,7 @@ for (i in 1:nrow(films)) {
     img_node <- read_html(films$url[i]) %>%
                 html_nodes(xpath='//*[(@id = "title-overview-widget")]//img') #//td[@id="img_primary"]//img_primary
     if (length(img_node)==0) {
-        films$img_file[i] <- "img/img00.jpg"
+        films$img_file[i] <- "img/img00.png"
         cat(i," : img file NOT FOUND: ",films$img_file[i],"\n")
     }
     else {
@@ -69,7 +69,7 @@ for (i in 1:nrow(films)) {
 }
 
 # Check which of the files were not found and download them manually
-films$title[which(films$img_file=="img/img00.jpg")]
+films$title[which(films$img_file=="img/img00.png")]
 
 # These images didn't exist in version 1. so Downloaded manually
 # now commented out
@@ -89,7 +89,7 @@ write.table(films,file="eastwood_films.csv",append=FALSE,quote=TRUE,sep="\t",row
 # =====================================Create a dataframe for box office earnings data ========#
 ##  Get box office earnings data for the films
 clint_box_office_url <- "http://www.boxofficemojo.com/people/chart/?id=clinteastwood.htm"
-bo_page <- html(clint_box_office_url)
+box_office_page <- read_html(clint_box_office_url)
 # Extract tables. The fourth table is the one we want, with adjusted box office returns
 bo <- box_office_page %>% html_table(header=TRUE,fill=TRUE) %>% (function(x) {x[[4]]})
 
@@ -99,7 +99,7 @@ bo$adjusted_gross <- as.numeric(gsub("[\\$\\,]","",bo$adjusted_gross))
 bo$unadjusted_gross <- as.numeric(gsub("[\\$\\,]","",bo$unadjusted_gross))
 bo$release_date <- strptime(bo$release_date,"%m/%d/%y")
 bo$release_date[32] <- strptime("1975-06-15",format("%Y-%m-%d"))
-bo$release_date <- correct_date(box_office$release_date)
+#bo$release_date <- correct_date(box_office$release_date)
 
 # Create a key for joining dataframes using the film title
 bo$key <- tolower(gsub("[^[:alnum:]]", "", bo$title))
@@ -110,4 +110,4 @@ bo$key[34] <- "therookie"
 box_office <- left_join(select(bo,bo_rank,studio,adjusted_gross,key),select(films,year,title,index,key),by="key")
 
 # Save the box_office data frame.
-write.table(box_office,file="eastwood_box_office.csv",append=FALSE,quote=TRUE,sep="\t",row.names=FALSE)
+write.table(box_office,file=paste(local_path,"eastwood_box_office.csv", sep="/"),append=FALSE,quote=TRUE,sep="\t",row.names=FALSE)
