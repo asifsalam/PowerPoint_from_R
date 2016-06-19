@@ -9,22 +9,15 @@ library(rvest)
 clint_url <- "http://www.imdb.com/name/nm0000142/"
 
 #Set your local path here
-<<<<<<< HEAD
-local_folder<- "Clint Eastwood"
-local_path <- paste(".", local_folder,sep="/")
+local_folder<- "img"
+local_path <- "."
 # Create the img sub-directory
 if (!file.exists(local_folder)) dir.create(local_folder)
 #pre-download the clint_url page manually into the local folder to test if reading works (even without internet)
-local_file <- paste(local_path, "Clint Eastwood - IMDb.html",sep="/")
+local_file <- paste(local_path,local_folder, "Clint Eastwood - IMDb.html",sep="/")
 
-test_page <- read_html(local_file, encoding="UTF-8")
-clint_page <- read_html(clint_url, encoding="UTF-8")
-=======
-local_path <- "./Clint Eastwood"
-local_file <- paste0(local_path,"Clint Eastwood - IMDb.html",sep="/")
 test_page <- read_html(local_file)
 clint_page <- read_html(clint_url)
->>>>>>> b8b5e2045a8ae971a294275a9fbd4d61cb44c6d3
 
 #film_selector <- ".filmo-row"
 film_selector <- "#filmo-head-actor+ .filmo-category-section .filmo-row"
@@ -68,13 +61,8 @@ for (i in 1:nrow(films)) {
     img_node <- read_html(films$url[i]) %>%
                 html_nodes(xpath='//*[(@id = "title-overview-widget")]//img') #//td[@id="img_primary"]//img_primary
     if (length(img_node)==0) {
-<<<<<<< HEAD
         films$img_file[i] <- "img00.png"
-        cat(i,"th : img file NOT FOUND: replacing by ",films$img_file[i],"\n")
-=======
-        films$img_file[i] <- "img/img00.png"
-        cat(i," : img file NOT FOUND: ",films$img_file[i],"\n")
->>>>>>> b8b5e2045a8ae971a294275a9fbd4d61cb44c6d3
+        cat(i,"th img file NOT FOUND: replacing by ",films$img_file[i],"\n")
     }
     else {
         img_link <- html_attr(img_node,"src")
@@ -84,17 +72,10 @@ for (i in 1:nrow(films)) {
 }
 
 # Check which of the files were not found and download them manually
-<<<<<<< HEAD
 films$title[which(films$img_file=="img00.png")]
 #none!
 # These images didn't exist in version 1. so then they had to be Downloaded manually
 # now commented outas no problem?
-=======
-films$title[which(films$img_file=="img/img00.png")]
-
-# These images didn't exist in version 1. so Downloaded manually
-# now commented out
->>>>>>> b8b5e2045a8ae971a294275a9fbd4d61cb44c6d3
 #films[55,"img_file"] <- "img/img55.jpg"
 #films[54,"img_file"] <- "img/img54.jpg"
 #films[52,"img_file"] <- "img/img52.jpg"
@@ -131,11 +112,6 @@ bo$key[34] <- "therookie"
 # Create a dataframe for the box office gross for the movies
 box_office <- left_join(select(bo,bo_rank,studio,adjusted_gross,key),select(films,year,title,index,key),by="key")
 
-# Save the box_office data frame.
-<<<<<<< HEAD
+# Save the box_office data frame. twice, as tsv and as csv. note the csv when opened might produce problems with commas in titles.
 write.table(box_office,file=paste(local_path,"eastwood_box_office.tsv", sep="/"),append=FALSE,quote=TRUE,sep="\t",row.names=FALSE)
 write.table(box_office,file=paste(local_path,"eastwood_box_office.csv", sep="/"),append=FALSE,quote=TRUE,sep=",",row.names=FALSE)
-
-=======
-write.table(box_office,file=paste(local_path,"eastwood_box_office.csv", sep="/"),append=FALSE,quote=TRUE,sep="\t",row.names=FALSE)
->>>>>>> b8b5e2045a8ae971a294275a9fbd4d61cb44c6d3
