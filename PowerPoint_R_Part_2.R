@@ -9,10 +9,10 @@ library(rvest)
 clint_url <- "http://www.imdb.com/name/nm0000142/"
 
 #Set your local path here
-local_path <- "C://"
-local_file <- paste0(local_path,"//Clint Eastwood - IMDb.html")
-test_page <- html(local_file)
-clint_page <- html(clint_url)
+local_path <- "./Clint Eastwood"
+local_file <- paste0(local_path,"/Clint Eastwood - IMDb.html")
+test_page <- read_html(local_file)
+clint_page <- read_html(clint_url)
 
 #film_selector <- ".filmo-row"
 film_selector <- "#filmo-head-actor+ .filmo-category-section .filmo-row"
@@ -36,11 +36,12 @@ films$index <- sprintf("%02d",seq_along(1:length(films$year)))
 films$img_file <- paste0("img/img",films$index,".jpg")
 
 # Extract the character name and add to dataframe
+# check exact xpath with Selectorgadget chrome extention
 get_character <- function(film,filmography) {
     i <- as.integer(film$index)
-    character_name <- filmography[i] %>% html_nodes(xpath=".//a[2]") %>% html_text()
+    character_name <- filmography[i] %>% html_nodes(xpath=".//a") %>% html_text()
     if (length(character_name)==0) {
-        character_name <- filmography[[i]] %>% 
+        character_name <- filmography[[i]] %>%
                             html_nodes(xpath="text()[preceding-sibling::br]") %>%
                             html_text() %>%
                             str_trim() %>%
@@ -49,17 +50,17 @@ get_character <- function(film,filmography) {
     return(character_name)
 }
 
-films$character_name <- daply(films,.(index),get_character,filmography)
+films$character_name <- daply(films,.(index),get_character,filmography) #had error: not same dimensions. because of xpath in get_character ".//a[2]
 
 # Loop through the films and download the poster image into the "img" subdirectory.
 # If the poster is not found, flag the file name with 0.
 for (i in 1:nrow(films)) {
-    img_node <- html(films$url[i]) %>% 
-                html_nodes(xpath='//td[@id="img_primary"]//img')
+    img_node <- read_html(films$url[i]) %>%
+                html_nodes(xpath='//*[(@id = "title-overview-widget")]//img') #//td[@id="img_primary"]//img_primary
     if (length(img_node)==0) {
         films$img_file[i] <- "img/img00.jpg"
         cat(i," : img file NOT FOUND: ",films$img_file[i],"\n")
-    } 
+    }
     else {
         img_link <- html_attr(img_node,"src")
         cat(i," :",films$img_file[i]," : ",img_link,"\n")
@@ -70,10 +71,11 @@ for (i in 1:nrow(films)) {
 # Check which of the files were not found and download them manually
 films$title[which(films$img_file=="img/img00.jpg")]
 
-# These images don't exist.  Download manually
-films[55,"img_file"] <- "img/img55.jpg"
-films[54,"img_file"] <- "img/img54.jpg"
-films[52,"img_file"] <- "img/img52.jpg"
+# These images didn't exist in version 1. so Downloaded manually
+# now commented out
+#films[55,"img_file"] <- "img/img55.jpg"
+#films[54,"img_file"] <- "img/img54.jpg"
+#films[52,"img_file"] <- "img/img52.jpg"
 
 # Correct this title (appears with strange characters because of my locale)
 films[40,"title"] <- "Kelly's Heroes"
