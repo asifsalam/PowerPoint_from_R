@@ -4,30 +4,30 @@ library(dplyr)
 library(stringr)
 library(rvest)
 
-# Assuming all the files are stored in the 
+# Assuming all the files are stored in the
 # download and read in the data files
 
-download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_films.csv", 
+download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_films.csv",
               destfile = "eastwood_films.csv")
-download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_box_office.csv", 
-              destfile = "box_office.csv")
-films <- read.table("eastwood_films.csv",header=TRUE, stringsAsFactors=FALSE)
-box_office <- read.table("box_office.csv",header=TRUE, stringsAsFactors=FALSE)
+download.file("https://raw.githubusercontent.com/asifsalam/PowerPoint_from_R/master/eastwood_box_office.csv",
+              destfile = "eastwood_box_office.csv")
+films <- read.table("eastwood_films.tsv",header=TRUE,sep="\t", stringsAsFactors=FALSE)
+box_office <- read.table("eastwood_box_office.tsv",header=TRUE,sep="\t", stringsAsFactors=FALSE)
 source("mso.txt")
 actor_name <- "Clint Eastwood"
 img_dir <- "img"
 
-# If you haven't downloaded the images, already - 
+# If you haven't downloaded the images, already -
 # Loop through the films and download the poster image into the "img" subdirectory.
 # If the poster is not found, flag the file name with 0.
 if (!file.exists("img")) dir.create("img")
 for (i in 1:nrow(films)) {
-    img_node <- html(films$url[i]) %>% 
+    img_node <- read_html(films$url[i]) %>%
         html_nodes(xpath='//td[@id="img_primary"]//img')
     if (length(img_node)==0) {
         films$img_file[i] <- "img/img00.jpg"
         cat(i," : img file NOT FOUND: ",films$img_file[i],"\n")
-    } 
+    }
     else {
         img_link <- html_attr(img_node,"src")
         cat(i," :",films$img_file[i]," : ",img_link,"\n")
@@ -36,13 +36,13 @@ for (i in 1:nrow(films)) {
 }
 
 # Check which of the files were not found and download them manually
-films$title[which(films$img_file=="img/img00.jpg")]
+films$title[which(films$img_file=="img00.jpg")]
 
 # These images don't exist.  Download appropriate images manually, and rename
 # Films, Star in the Dust, The First Traveling Sales Lady, Dumbo Pilot
-films[55,"img_file"] <- "img/img55.jpg"
-films[54,"img_file"] <- "img/img54.jpg"
-films[52,"img_file"] <- "img/img52.jpg"
+#films[55,"img_file"] <- "img/img55.jpg"
+#films[54,"img_file"] <- "img/img54.jpg"
+#films[52,"img_file"] <- "img/img52.jpg"
 
 ########## Creating the PowerPoint Slide ###################33
 # Create the PowerPoint slide
@@ -143,7 +143,7 @@ for (i in 1:nrow(films)) {
         ms$msoShapeRectangle,
         x, y,
         image_width, image_height)
-   
+
 }
 
 # Neat! We can now place images and shapes quite precisely on the slide.
@@ -159,13 +159,13 @@ remove_shapes <- function(shape_name="Rectangle") {
         #print(paste0("index",i," - Shape: ",shp[["Name"]]))
         rect <- grepl(shape_name,shp[["Name"]])
         if (rect) {
-            j <- j +1     
+            j <- j +1
             shp_todelete[[j]] <- slide1$Shapes(i)
             #shp$Delete()
             print(paste0("Shape : ",shp[["Name"]]," deleted..."))
-        }      
+        }
     }
-    
+
     for (i in 1:j) {
         shp_todelete[[i]]$Delete()
     }
@@ -183,14 +183,14 @@ for (i in 1:nrow(films)) {
     image_file <- gsub("/","\\\\",paste(getwd(),"/",films$img_file[i],sep=""))
     images[[as.character(i)]] <- slide1[["Shapes"]]$AddPicture(image_file,TRUE,FALSE,x+1,y+1,image_width-2,image_height-2)
     image <- images[[as.character(i)]]
-    
+
     line <- image[["Line"]]
     line[["Style"]] <- ms$msoLineSingle
     line[["Weight"]] <- 2
     line[["ForeColor"]][["RGB"]] <- pp_rgb(255,255,255)
 }
 
-# The slide is still static.  Let's add animation.  We will include the ability to sort the 
+# The slide is still static.  Let's add animation.  We will include the ability to sort the
 # poster images: 1-Sort by release date, and 2-Sort by film title
 # We'll create two buttons for the sort, and then animate the posters based on a click event.
 
@@ -241,7 +241,7 @@ seq_date = slide1[["TimeLine"]][["InteractiveSequences"]]$Add()
 
 # We can create a function that will apply animation to a shape, in this case the poster image
 # The goal is to move the image from one point to another
-# This function takes an timeline (sequence), the poster image that will be animated, 
+# This function takes an timeline (sequence), the poster image that will be animated,
 # the button that will trigger the animation, the path along which the image will move
 # and the duration, and applies the animation and parameters to the target poster image
 
@@ -260,25 +260,25 @@ animate_image <- function(seq,image,trigger,path,duration=1.5) {
 # Let's add some animation to the poster images
 # The tricky bit here is the getting the path right
 for (i in 1:nrow(films)) {
-    
+
     # Populate the slide with the poster images
     x = 0 + image_width * ((i-1) %% num_cols)
     y = image_height*3 + image_height * ((i-1) %/% num_cols)
     img_file <- gsub("/","\\\\",paste(getwd(),"/",films$img_file[i],sep=""))
     images[[as.character(i)]] <- slide1[["Shapes"]]$AddPicture(img_file,TRUE,FALSE,x+1,y+1,image_width-1,image_height-1)
     image <- images[[as.character(i)]]
-    
+
     # Some formatting
     line <- image[["Line"]]
     line[["Style"]] <- ms$msoLineSingle
     line[["Weight"]] <- 2
     line[["ForeColor"]][["RGB"]] <- pp_rgb(205,255,243)
-    
+
     # Add the url to the IMDB page, and tool tip - the film title, character name and the release year
     link <- image$ActionSettings(ms$ppMouseClick)[["Hyperlink"]]
     link[["Address"]] <- films$url[i]
     link[["ScreenTip"]] <- paste0(films$title[i],"\nCharacter: ",films$character_name[i],"\nRelease Year: ",films$year[i])
-    
+
     # Animate on button click, so the posters resort based on title or release year
     index <- which(films$title[order(films$title)]==films$title[i]) - 1
     l1 <- format((0 + image_width * (index %% num_cols) - x)/slide_width,digits=3)
@@ -287,5 +287,5 @@ for (i in 1:nrow(films)) {
     animate_image(seq_alpha,image,button_alpha,path)
     path <- paste0("M",l1,",",l2," L0,0")
     animate_image(seq_date,image,button_date,path)
-    
+
 }
