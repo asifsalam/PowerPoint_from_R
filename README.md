@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # PowerPoint_from_R
 Create amazing PowerPoint slides using R
 
@@ -8,3 +9,6 @@ For Part 1:
 1- PowerPoint_R_Part_1.R     (the code form the tutorial)
 2 - mso.txt                   (MS Office enumerated constants)
 3 - PowerPoint_R_Part_1.pptx  (output PowerPoint)
+=======
+# PPTfromR
+>>>>>>> d6401cacaf4cc81c20c7cb9c4b1a9d1f08005871
